@@ -1,0 +1,133 @@
+            if (HORAS_MES_BASE === 0) {
+                infoSueldoCustomEl.textContent = 'Las horas base mensuales no pueden ser cero. Por favor, ajuste las horas semanales.';
+                return;
+            }
+
+            const nuevaHoraBaseCustom = sueldoCustom / HORAS_MES_BASE;
+            infoSueldoCustomEl.textContent = `Tasas recalculadas con base horaria de: ${formatearPesos(nuevaHoraBaseCustom, 2)} (derivado de ${formatearPesos(sueldoCustom,0)}/mes y ${HORAS_MES_BASE.toFixed(2)} hrs/mes).`;
+
+            for (const tipo in TASAS_BASE_INFO) {
+                const tasaInfoOriginal = TASAS_BASE_INFO[tipo];
+                const nuevoValorCalculado = nuevaHoraBaseCustom * tasaInfoOriginal.factorRecargo;
+                tasasCalculadoraActuales[tipo] = {
+                    nombre: tasaInfoOriginal.nombre,
+                    valorParaCalculo: nuevoValorCalculado,
+                    descTextForLabel: construirTextoDescriptivoEtiqueta(tasaInfoOriginal, nuevaHoraBaseCustom),
+                    idLabel: tasaInfoOriginal.idLabel
+                };
+            }
+            actualizarEtiquetasDOM();
+        }
+
+        function resetearTasasASMLV() {
+            inicializarTasasCalculadoraConSMLV();
+            actualizarEtiquetasDOM();
+            document.getElementById('sueldoMensualCustom').value = '';
+            const infoSueldoCustomEl = document.getElementById('infoSueldoCustom');
+            const currentBaseHourSMLV = getHoraOrdDiurnaSMLVBaseCalc();
+            infoSueldoCustomEl.textContent = `Tasas restauradas a valores SMLV (Base SMLV actual: ${formatearPesos(currentBaseHourSMLV,2)}/hr con ${HORAS_MES_BASE.toFixed(2)} hrs/mes).`;
+        }
+
+        function calcularSueldo() {
+            let totalSueldo = 0;
+            let totalHorasTrabajadas = 0;
+            let detalleCalculoStr = "";
+            let alMenosUnaHora = false;
+
+            const idsHorasInputs = {
+                ordDiurna: 'horasOrdDiurna', ordNocturna: 'horasOrdNocturna',
+                extraDiurna: 'horasExtraDiurna', extraNocturna: 'horasExtraNocturna',
+                domFestDiurna: 'horasDomFestDiurna', extraDomFest: 'horasExtraDomFest'
+            };
+
+            for (const tipo in idsHorasInputs) {
+                const horasInput = document.getElementById(idsHorasInputs[tipo]);
+                const horas = parseFloat(horasInput.value) || 0;
+                if (horas < 0) {
+                    alert(`Por favor, ingresa un valor positivo para las ${tasasCalculadoraActuales[tipo].nombre}.`);
+                    horasInput.focus(); return;
+                }
+                if (horas > 0) {
+                    alMenosUnaHora = true;
+                    const tasaParaCalculo = tasasCalculadoraActuales[tipo].valorParaCalculo;
+                    const subtotal = horas * tasaParaCalculo;
+                    totalSueldo += subtotal;
+                    totalHorasTrabajadas += horas;
+                    detalleCalculoStr += `${horas.toFixed(2)} ${tasasCalculadoraActuales[tipo].nombre} × ${formatearPesos(tasaParaCalculo, 2)} = ${formatearPesos(subtotal, 2)}\n`;
+                }
+            }
+
+            const horasCustomFijo = parseFloat(document.getElementById('horasCustomValorFijo').value) || 0;
+            const valorCustomFijo = parseFloat(document.getElementById('valorCustomValorFijo').value) || 0;
+
+            if (horasCustomFijo < 0 || valorCustomFijo < 0) {
+                 alert('Las horas y valor personalizado fijo deben ser positivos.'); return;
+            }
+            if (horasCustomFijo > 0 && valorCustomFijo > 0) {
+                alMenosUnaHora = true;
+                const subtotalCustom = horasCustomFijo * valorCustomFijo;
+                totalSueldo += subtotalCustom;
+                totalHorasTrabajadas += horasCustomFijo;
+                detalleCalculoStr += `${horasCustomFijo.toFixed(2)} horas (valor fijo personalizado) × ${formatearPesos(valorCustomFijo, 2)} = ${formatearPesos(subtotalCustom, 2)}\n`;
+            } else if (horasCustomFijo > 0 && valorCustomFijo <= 0) {
+                alert('Si ingresas horas con valor fijo, especifica un valor por hora mayor a cero.'); return;
+            }
+
+            if (!alMenosUnaHora) {
+                alert('Ingresa horas para al menos un tipo.'); return;
+            }
+
+            document.getElementById('texto-resultado').innerHTML = `
+                <div class="result-summary">
+                    <div><strong>Total horas trabajadas:</strong> ${totalHorasTrabajadas.toFixed(2)}</div>
+                    <div class="result-total">Sueldo total calculado: ${formatearPesos(totalSueldo, 2)}</div>
+                </div>`;
+
+            if (detalleCalculoStr === "") detalleCalculoStr = "No se ingresaron horas.\n";
+
+            let analisisSMLV = ""
+            if (SMLV_MENSUAL > 0 && HORAS_MES_BASE > 0) { 
+                const porcentajeSMLV = (totalSueldo / SMLV_MENSUAL * 100).toFixed(1);
+                analisisSMLV = `\n<div class="smlv-analysis"><strong>📊 Análisis comparativo con SMLV (${formatearPesos(SMLV_MENSUAL, 0)}):</strong>\n`;
+                if (totalSueldo >= SMLV_MENSUAL) {
+                    analisisSMLV += `<span class="positive">✅ Este sueldo representa el <strong>${porcentajeSMLV}%</strong> del SMLV.</span>`;
+                } else {
+                    analisisSMLV += `<span class="negative">⚠️ Este sueldo está <strong>${formatearPesos(SMLV_MENSUAL - totalSueldo, 0)}</strong> por debajo del SMLV. Representa el <strong>${porcentajeSMLV}%</strong> del SMLV.</span>`;
+                }
+                analisisSMLV += `</div>`;
+            }
+
+            document.getElementById('detalle-calculo').innerHTML = detalleCalculoStr.trim() + "\n" + analisisSMLV;
+            document.getElementById('resultado-sueldo').style.display = 'block';
+            document.getElementById('resultado-sueldo').scrollIntoView({ behavior: 'smooth' }); 
+        }
+
+        function limpiarCalculadora() {
+            const idsInputs = ['horasOrdDiurna', 'horasOrdNocturna', 'horasExtraDiurna',
+                               'horasExtraNocturna', 'horasDomFestDiurna', 'horasExtraDomFest',
+                               'horasCustomValorFijo', 'valorCustomValorFijo'];
+            idsInputs.forEach(id => { document.getElementById(id).value = '0'; });
+
+            document.getElementById('horasSemanalesInput').value = 42; 
+            
+            document.getElementById('sueldoMensualCustom').value = ''; 
+            resetearTasasASMLV(); 
+
+            document.getElementById('resultado-sueldo').style.display = 'none';
+            document.getElementById('infoSueldoCustom').textContent = 'Calculadora limpiada. Tasas SMLV restauradas con horas base predeterminadas.';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('horasSemanalesInput').value = horasSemanalesActuales;
+
+            const textoCalculoBaseEl = document.getElementById('textoCalculoBaseSMLV');
+            const initialBaseCalc = getHoraOrdDiurnaSMLVBaseCalc();
+            textoCalculoBaseEl.innerHTML = `Base de cálculo SMLV: Hora ordinaria diurna = ${formatearPesos(SMLV_MENSUAL, 0)} / ${HORAS_MES_BASE.toFixed(2)} horas = <strong>${formatearPesos(initialBaseCalc, 2)}</strong> (aprox.)`;
+
+            actualizarDisplayValoresReferenciaSMLV(initialBaseCalc);
+            inicializarTasasCalculadoraConSMLV(); 
+            actualizarEtiquetasDOM(); 
+        });
+    </script>
+</body>
+</html>
