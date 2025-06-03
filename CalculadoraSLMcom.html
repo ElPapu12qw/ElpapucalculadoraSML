@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Sueldo Interactiva</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 16px; /* Slightly larger radius */
+            padding: 30px 35px; /* Increased padding */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* Softer shadow */
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px; /* Adjusted margin for new section */
+            font-size: 2.3em; /* Adjusted size */
+        }
+        h2 { /* Style for summary/details heading */
+            color: #3498db;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        h3, h4 { /* Grouped heading styles */
+            color: #2980b9; /* Consistent heading color */
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; }
+        h5 { font-size: 1.1em; color: #34495e; margin-bottom: 10px;}
+
+        .info-collapsible {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+        }
+        .info-collapsible summary {
+            font-weight: bold;
+            font-size: 1.4em;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 10px 0;
+            outline: none;
+        }
+        .info-collapsible summary:hover {
+            color: #3498db;
+        }
+        .info-collapsible summary::marker { /* Styling for the arrow */
+            color: #3498db;
+        }
+        .info-collapsible .content {
+            padding-top: 15px;
+        }
+        .info-collapsible table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        .info-collapsible th, .info-collapsible td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .info-collapsible th {
+            background-color: #e9ecef;
+            font-weight: bold;
+            color: #495057;
+        }
+        .info-collapsible td:nth-child(1) { font-weight: 500; } /* Concepto bold */
+        .info-collapsible td:last-child { text-align: right; } /* Align numbers to right */
+
+
+        .section-base { /* Base for common section styling */
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border-left: 5px solid #3498db; /* Primary accent for sections */
+        }
+
+        .calculator {
+            background: #eef7ff; /* Lighter, softer blue */
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #bde0fe; /* Softer border */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        input[type="number"], input[type="text"], button, select { /* Consolidated input/button styling */
+            padding: 12px 15px; /* Increased padding */
+            margin: 8px 0; /* Vertical margin for spacing */
+            border: 1px solid #ced4da; /* Softer border */
+            border-radius: 8px; /* Softer radius */
+            font-size: 16px;
+            box-sizing: border-box;
+            width: 100%; /* Default to full width, override in grids */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.95em;
+            color: #495057;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px; /* Increased gap */
+            margin-bottom: 25px;
+        }
+        .calculator-field {
+            padding: 15px;
+            background: #ffffff; /* Cleaner background */
+            border-radius: 8px;
+            border: 1px solid #e0e0e0; /* Subtle border */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .custom-salary-section {
+            background: #fff3cd; /* Softer yellow */
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 12px;
+        }
+        .custom-salary-section h4 {
+            color: #856404; /* Darker text for better contrast */
+        }
+        button {
+            background: #28a745; /* Primary action green */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: bold;
+            border: none; /* Remove default border */
+        }
+        button:hover {
+            background: #218838; /* Darker green on hover */
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        /* Specific button styles */
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529; /* Dark text for yellow bg */
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-export { /* Style for the export button */
+            background-color: #007bff; /* Blue */
+            margin-top: 15px;
+        }
+        .btn-export:hover {
+            background-color: #0056b3;
+        }
+
+
+        .result {
+            background: #e6ffed; /* Light green for success/result */
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 1px solid #a6d7a1; /* Green border */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+        }
+        .result h4 { color: #155724; }
+
+        .official-values-section { /* Wrapper for reference values */
+            background: #e9ecef; /* Light gray background */
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 5px solid #17a2b8; /* Info color */
+        }
+        .official-values-section h4 {
+            color: #0c5460; /* Darker blue for this section heading */
+        }
+        .official-values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        .official-values-grid div {
+            padding: 12px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #d6d8db;
+            color: #495057;
+        }
+        .official-values-grid div strong { color: #343a40; }
+
+        .horas-semanales-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e0f7fa; /* Light cyan */
+            border-left: 4px solid #007bff;
+            border-radius: 8px;
+            display: flex; /* For aligning input and button */
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        .horas-semanales-container label {
+            font-size: 0.95em;
+            margin-bottom: 0; /* Remove bottom margin as it's flex item */
+            flex-grow: 1; /* Allow label to take space */
+        }
+        .horas-semanales-container input[type="number"] {
+            width: 90px !important; /* Maintained specific width, slightly increased */
+            margin: 0; /* Reset margin */
+        }
+        .horas-semanales-container button {
+            padding: 10px 15px; /* Adjusted padding for this button */
+            font-size: 14px;
+            width: auto; /* Allow button to size based on content */
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+
+        .additional-options-section { /* For "Horas Adicionales" */
+            border-top: 2px dashed #28a745;
+            padding-top: 20px;
+            margin-top:25px;
+        }
+        .additional-options-section h4 { color: #1e7e34; }
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .result-summary div strong { font-size: 1.1em; }
+        .result-total {
+            font-size: 1.4em;
+            color: #155724; /* Dark green */
+            font-weight: bold;
+        }
+        .detailed-calculation {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f8f0; /* Very light green */
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .detailed-calculation h5 { color: #1e7e34; }
+        .detailed-calculation p { white-space: pre-wrap; font-size: 0.95em; line-height: 1.6; }
+        .formula-note {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .smlv-analysis strong { font-weight: bold; }
+        .smlv-analysis .positive { color: #155724; } /* Green for positive SMLV analysis */
+        .smlv-analysis .negative { color: #721c24; } /* Red for negative SMLV analysis */
+
+        /* Utility for small text/notes */
+        .text-small {
+            font-size:0.85em;
+            color: #555;
+            margin-top: 10px; /* Add some space for notes */
+        }
+        #infoSueldoCustom {
+            font-size:0.9em;
+            color: #856404; /* Match custom salary section accent */
+            margin-top:10px;
+            font-weight: bold;
+        }
+
+        /* Subsidio de Transporte Section */
+        .subsidio-transporte-section {
+            background: #d4edda; /* Light green */
+            border-left: 5px solid #28a745; /* Darker green accent */
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            color: #155724; /* Dark green text */
+        }
+        .subsidio-transporte-section h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        .subsidio-transporte-section p {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        /* Responsive adjustments for very small screens if needed */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 1.9em;
+            }
+            .info-collapsible summary { font-size: 1.2em; }
+            .info-collapsible th, .info-collapsible td { padding: 8px; font-size: 0.9em; }
+
+            h3 { font-size: 1.4em; }
+            h4 { font-size: 1.2em; }
+
+            input[type="number"], input[type="text"], button, select {
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+            .calculator-grid, .official-values-grid {
+                gap: 15px;
+            }
+             .horas-semanales-container {
+                flex-direction: column; /* Stack elements vertically */
+                align-items: stretch; /* Make children full width */
+            }
+            .horas-semanales-container input[type="number"],
+            .horas-semanales-container button {
+                width: 100% !important; /* Full width for input and button on small screens */
+            }
+            .horas-semanales-container label {
+                margin-bottom: 5px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Calculadora de Sueldo Interactiva</h1>
+
+        <div class="subsidio-transporte-section">
+            <h3>¡Importante! Subsidio de Transporte en Colombia 2025</h3>
+            <p>
+                El subsidio de transporte en Colombia para el año 2025 es de **$200.000 pesos mensuales**.
+                Este auxilio se suma al sueldo base para aquellos trabajadores que devengan hasta dos salarios
+                mínimos mensuales legales vigentes (SMMLV) y no reciben transporte directo por parte de su empleador.
+                La calculadora incluirá este valor automáticamente si el sueldo final (antes del auxilio) es inferior
+                o igual a 2 SMMLV.
+            </p>
+        </div>
+
+        <details class="info-collapsible">
+            <summary>ℹ️ Valores de Referencia Hora Laboral 2025 y Cálculo de Extras (Info Adicional)</summary>
+            <div class="content">
+                <h4>Valores de la Hora Laboral para 2025 (Basados en SMLV de $1.423.500 y 168 horas/mes)</h4>
+                <p>Aquí tienes el desglose de los valores de la hora, aplicando los recargos legales a la nueva hora base:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Recargo (aprox.)</th>
+                            <th>Cálculo</th>
+                            <th>Valor en Pesos (redondeado)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hora ordinaria diurna</td>
+                            <td>0%</td>
+                            <td>$1.423.500 ÷ 168</td>
+                            <td>$8.473</td>
+                        </tr>
+                        <tr>
+                            <td>Hora ordinaria nocturna</td>
+                            <td>35%</td>
+                            <td>$8.473,21 × 1.35</td>
+                            <td>$11.439</td>
+                        </tr>
+                        <tr>
+                            <td>Hora extra diurna</td>
+                            <td>25%</td>
+                            <td>$8.473,21 × 1.25</td>
+                            <td>$10.592</td>
+                        </tr>
+                        <tr>
+                            <td>Hora extra nocturna</td>
+                            <td>75%</td>
+                            <td>$8.473,21 × 1.75</td>
+                            <td>$14.828</td>
+                        </tr>
+                        <tr>
+                            <td>Hora dominical/festiva diurna</td>
+                            <td>75%</td>
+                            <td>$8.473,21 × 1.75</td>
+                            <td>$14.828</td>
+                        </tr>
+                        <tr>
+                            <td>Hora extra dominical/festiva</td>
+                            <td>100%</td>
+                            <td>$8.473,21 × 2.00</td>
+                            <td>$16.946</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-small">Nota: Se han utilizado dos decimales para el cálculo exacto de la hora base y luego se ha redondeado el resultado final a pesos.</p>
+
+                <h4>Valor de una Sola Hora Extra (con SMLV de $1.423.500)</h4>
+                <p>Para calcular el valor de una sola hora extra, usamos la hora ordinaria base de $8.473,21:</p>
+                <h5>Hora Extra Diurna (entre 6:00 a.m. y 9:00 p.m.):</h5>
+                <ul>
+                    <li>Recargo del 25%</li>
+                    <li>Cálculo: $8.473,21 × 1.25 = $10.591,51</li>
+                    <li>Si haces solo una hora extra diurna, te valdría aproximadamente $10.592.</li>
+                </ul>
+                <h5>Hora Extra Nocturna (entre 9:00 p.m. y 6:00 a.m.):</h5>
+                <ul>
+                    <li>Recargo del 75%</li>
+                    <li>Cálculo: $8.473,21 × 1.75 = $14.828,12</li>
+                    <li>Si haces solo una hora extra nocturna, te valdría aproximadamente $14.828.</li>
+                </ul>
+                <button class="btn-export" onclick="alert('Funcionalidad de exportar no implementada en este ejemplo.')">📄 Exportar a Hojas de cálculo</button>
+            </div>
+        </details>
+
+        <div id="calculadora"> <div class="calculator">
+                <h3>Cálculo del Sueldo Mensual</h3>
+                <p>Ingresa el número de horas trabajadas en el mes para cada tipo. Valores oficiales de Colombia 2025 (basados en SMLV) utilizados por esta calculadora:</p>
+
+                <div class="official-values-section">
+                    <h4>📋 Valores de Referencia Usados por la Calculadora (SMLV: $1.423.500)</h4>
+
+                    <div class="horas-semanales-container">
+                        <label for="horasSemanalesInput">Horas laborales por semana (para cálculo base SMLV):</label>
+                        <input type="number" id="horasSemanalesInput" value="42" min="1">
+                        <button onclick="actualizarBaseCalculoHoras()" class="btn-info">Actualizar Base de Horas</button>
+                    </div>
+
+                    <p id="textoCalculoBaseSMLV">Base de cálculo SMLV: Hora ordinaria diurna = $1.423.500 / 168 horas = <strong>$8.473,21</strong> (aprox.)</p>
+                    <div class="official-values-grid">
+                        <div id="valRefOrdDiurna"><strong>Hora ordinaria diurna:</strong> $8.473,21 (Base)</div>
+                        <div id="valRefOrdNocturna"><strong>Hora ordinaria nocturna:</strong> $11.862,50 (Recargo: 40%)</div>
+                        <div id="valRefExtraDiurna"><strong>Hora extra diurna:</strong> $10.591,52 (Recargo: 25%)</div>
+                        <div id="valRefExtraNocturna"><strong>Hora extra nocturna:</strong> $14.828,13 (Recargo: 75%)</div>
+                        <div id="valRefDomFestDiurna"><strong>Hora dominical/festiva diurna:</strong> $13.557,14 (Recargo: 60%)</div>
+                        <div id="valRefExtraDomFest"><strong>Hora extra dominical/festiva:</strong> $16.946,43 (Recargo: 100%)</div>
+                    </div>
+                    <p class="text-small"><i>Nota: Los valores de la tabla superior y las tasas horarias para SMLV se recalculan dinámicamente si cambia la base de horas semanales. El cálculo del sueldo con SMLV utiliza estas tasas recalculadas.</i></p>
+                </div>
+
+                <div class="custom-salary-section">
+                    <h4>✨ Opcional: Calcular con un sueldo mensual diferente al SMLV</h4>
+                    <label for="sueldoMensualCustom">Su sueldo mensual bruto (antes de descuentos):</label>
+                    <input type="number" id="sueldoMensualCustom" placeholder="Ej: 2000000" min="0">
+                    <button onclick="actualizarTasasPorSueldoCustom()" class="btn-warning">Recalcular tasas horarias con mi sueldo</button>
+                    <button onclick="resetearTasasASMLV()" class="btn-secondary">Usar tasas SMLV</button>
+                    <p id="infoSueldoCustom"></p>
+                </div>
+
+                <div class="calculator-grid">
+                    <div class="calculator-field">
+                        <label for="horasOrdDiurna" id="labelHorasOrdDiurna"></label>
+                        <input type="number" id="horasOrdDiurna" placeholder="Ej: 120" min="0" value="0">
+                    </div>
+                    <div class="calculator-field">
+                        <label for="horasOrdNocturna" id="labelHorasOrdNocturna"></label>
+                        <input type="number" id="horasOrdNocturna" placeholder="Ej: 0" min="0" value="0">
+                    </div>
+                    <div class="calculator-field">
+                        <label for="horasExtraDiurna" id="labelHorasExtraDiurna"></label>
+                        <input type="number" id="horasExtraDiurna" placeholder="Ej: 0" min="0" value="0">
+                    </div>
+                    <div class="calculator-field">
+                        <label for="horasExtraNocturna" id="labelHorasExtraNocturna"></label>
+                        <input type="number" id="horasExtraNocturna" placeholder="Ej: 0" min="0" value="0">
+                    </div>
+                    <div class="calculator-field">
+                        <label for="horasDomFestDiurna" id="labelHorasDomFestDiurna"></label>
+                        <input type="number" id="horasDomFestDiurna" placeholder="Ej: 0" min="0" value="0">
+                    </div>
+                    <div class="calculator-field">
+                        <label for="horasExtraDomFest" id="labelHorasExtraDomFest"></label>
+                        <input type="number" id="horasExtraDomFest" placeholder="Ej: 0" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="additional-options-section">
+                    <h4>💡 Opcional: Horas Adicionales con Valor Personalizado Fijo</h4>
+                     <div class="calculator-grid">
+                        <div class="calculator-field">
+                            <label for="horasCustomValorFijo">Horas con valor personalizado fijo:</label>
+                            <input type="number" id="horasCustomValorFijo" placeholder="Ej: 10" min="0" value="0">
+                        </div>
+                        <div class="calculator-field">
+                            <label for="valorCustomValorFijo">Valor personalizado fijo por hora ($):</label>
+                            <input type="number" id="valorCustomValorFijo" placeholder="Ej: 9000" min="0" step="0.01" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap:wrap;">
+                    <button onclick="calcularSueldo()" style="flex-grow: 1; min-width: 150px;">🧮 Calcular Sueldo</button>
+                    <button onclick="limpiarCalculadora()" class="btn-secondary" style="flex-grow: 1; min-width: 150px;">🗑️ Limpiar Todo</button>
+                </div>
+
+                <div id="resultado-sueldo" style="display: none;" class="result">
+                    <h4>💵 Resultado del Cálculo:</h4>
+                    <div id="texto-resultado"></div>
+                    <div id="calculo-detallado" class="detailed-calculation">
+                        <h5>📊 Cálculo Detallado:</h5>
+                        <p id="detalle-calculo"></p>
+                        <div class="formula-note">
+                            <strong>Fórmula general aplicada:</strong><br>
+                            Sueldo Total = Suma de (Horas trabajadas de cada tipo × Valor por hora correspondiente)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SMLV_MENSUAL = 1423500;
+        const SUBSIDIO_TRANSPORTE = 200000; // Valor del subsidio de transporte para 2025
+        let horasSemanalesActuales = 42;
+        const semanasPorMesParaCalculo = 4;
+        let HORAS_MES_BASE = horasSemanalesActuales * semanasPorMesParaCalculo;
+
+        // These are the rates THE CALCULATOR USES.
+        // Note: These might differ from the informational text added above if not updated here.
+        const TASAS_BASE_INFO = {
+            ordDiurna:     { nombre: "Horas ordinarias diurnas", factorRecargo: 1.0,   recargoPctTexto: "Base SMLV", idLabel: "labelHorasOrdDiurna" },
+            ordNocturna:   { nombre: "Horas ordinarias nocturnas", factorRecargo: 1.40,  recargoPctTexto: "Rec: 40%", idLabel: "labelHorasOrdNocturna" }, // Calculator uses 40%
+            extraDiurna:   { nombre: "Horas extra diurnas", factorRecargo: 1.25,  recargoPctTexto: "Rec: 25%", idLabel: "labelHorasExtraDiurna" },
+            extraNocturna: { nombre: "Horas extra nocturnas", factorRecargo: 1.75,  recargoPctTexto: "Rec: 75%", idLabel: "labelHorasExtraNocturna" },
+            domFestDiurna: { nombre: "Horas dom./fest. diurnas", factorRecargo: 1.60,  recargoPctTexto: "Rec: 60%", idLabel: "labelHorasDomFestDiurna" }, // Calculator uses 60%
+            extraDomFest:  { nombre: "Horas extra dom./fest.", factorRecargo: 2.00, recargoPctTexto: "Rec: 100%", idLabel: "labelHorasExtraDomFest" }
+        };
+
+        let tasasCalculadoraActuales = {};
+
+        function formatearPesos(num, minDecimals = 2, maxDecimals = 2) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency', currency: 'COP',
+                minimumFractionDigits: minDecimals, maximumFractionDigits: maxDecimals
+            }).format(num);
+        }
+
+        function getHoraOrdDiurnaSMLVBaseCalc() {
+            if (HORAS_MES_BASE === 0) return 0;
+            return SMLV_MENSUAL / HORAS_MES_BASE;
+        }
+
+        function construirTextoDescriptivoEtiqueta(tasaInfoOriginal, valorBaseReferencia) {
+            let desc = `<span style="font-size:0.85em; color: #555;">`;
+            if (tasaInfoOriginal.factorRecargo === 1.0) {
+                desc += `(Base: ${formatearPesos(valorBaseReferencia, 2)})`;
+            } else {
+                const resultadoAritmeticoReferencia = valorBaseReferencia * tasaInfoOriginal.factorRecargo;
+                desc += `(ref: ${formatearPesos(valorBaseReferencia, 2)} x ${tasaInfoOriginal.factorRecargo.toFixed(2)} = ${formatearPesos(resultadoAritmeticoReferencia, 2)}; ${tasaInfoOriginal.recargoPctTexto})`;
+            }
+            desc += `</span>`;
+            return desc;
+        }
+
+        function inicializarTasasCalculadoraConSMLV() {
+            const valorBaseReferenciaSMLV = getHoraOrdDiurnaSMLVBaseCalc();
+            for (const tipo in TASAS_BASE_INFO) {
+                const tasaInfoOriginal = TASAS_BASE_INFO[tipo];
+                const valorParaCalculo = valorBaseReferenciaSMLV * tasaInfoOriginal.factorRecargo;
+
+                tasasCalculadoraActuales[tipo] = {
+                    nombre: tasaInfoOriginal.nombre,
+                    valorParaCalculo: valorParaCalculo,
+                    descTextForLabel: construirTextoDescriptivoEtiqueta(tasaInfoOriginal, valorBaseReferenciaSMLV),
+                    idLabel: tasaInfoOriginal.idLabel
+                };
+            }
+        }
+
+        function actualizarEtiquetasDOM() {
+            for (const tipo in tasasCalculadoraActuales) {
+                const data = tasasCalculadoraActuales[tipo];
+                document.getElementById(data.idLabel).innerHTML =
+                    `${data.nombre}: <strong style="color: #0056b3; font-size: 1.05em;">${formatearPesos(data.valorParaCalculo, 2)}/hr</strong><br>${data.descTextForLabel}`;
+            }
+        }
+
+        function actualizarDisplayValoresReferenciaSMLV(currentSMLVBaseHour) {
+            document.getElementById('valRefOrdDiurna').innerHTML = `<strong>Hora ordinaria diurna:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.ordDiurna.factorRecargo, 2)} (${TASAS_BASE_INFO.ordDiurna.recargoPctTexto})`;
+            document.getElementById('valRefOrdNocturna').innerHTML = `<strong>Hora ordinaria nocturna:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.ordNocturna.factorRecargo, 2)} (${TASAS_BASE_INFO.ordNocturna.recargoPctTexto})`;
+            document.getElementById('valRefExtraDiurna').innerHTML = `<strong>Hora extra diurna:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.extraDiurna.factorRecargo, 2)} (${TASAS_BASE_INFO.extraDiurna.recargoPctTexto})`;
+            document.getElementById('valRefExtraNocturna').innerHTML = `<strong>Hora extra nocturna:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.extraNocturna.factorRecargo, 2)} (${TASAS_BASE_INFO.extraNocturna.recargoPctTexto})`;
+            document.getElementById('valRefDomFestDiurna').innerHTML = `<strong>Hora dominical/festiva diurna:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.domFestDiurna.factorRecargo, 2)} (${TASAS_BASE_INFO.domFestDiurna.recargoPctTexto})`;
+            document.getElementById('valRefExtraDomFest').innerHTML = `<strong>Hora extra dominical/festiva:</strong> ${formatearPesos(currentSMLVBaseHour * TASAS_BASE_INFO.extraDomFest.factorRecargo, 2)} (${TASAS_BASE_INFO.extraDomFest.recargoPctTexto})`;
+        }
+
+
+        function actualizarBaseCalculoHoras() {
+            const inputHorasSemanales = document.getElementById('horasSemanalesInput');
+            const nuevasHorasSemanales = parseFloat(inputHorasSemanales.value);
+
+            if (isNaN(nuevasHorasSemanales) || nuevasHorasSemanales <= 0) {
+                alert("Por favor, ingresa un número válido de horas semanales.");
+                inputHorasSemanales.value = horasSemanalesActuales;
+                return;
+            }
+
+            horasSemanalesActuales = nuevasHorasSemanales;
+            HORAS_MES_BASE = horasSemanalesActuales * semanasPorMesParaCalculo;
+            if (HORAS_MES_BASE === 0) {
+                alert("El total de horas mensuales base no puede ser cero.");
+                HORAS_MES_BASE = (horasSemanalesActuales * semanasPorMesParaCalculo > 0) ? horasSemanalesActuales * semanasPorMesParaCalculo : 1;
+                inputHorasSemanales.value = HORAS_MES_BASE / semanasPorMesParaCalculo;
+            }
+
+
+            const textoCalculoBaseEl = document.getElementById('textoCalculoBaseSMLV');
+            const nuevaBaseCalculadaSMLV = getHoraOrdDiurnaSMLVBaseCalc();
+            textoCalculoBaseEl.innerHTML = `Base de cálculo SMLV: Hora ordinaria diurna = ${formatearPesos(SMLV_MENSUAL, 0)} / ${HORAS_MES_BASE.toFixed(2)} horas = <strong>${formatearPesos(nuevaBaseCalculadaSMLV, 2)}</strong> (aprox.)`;
+
+            actualizarDisplayValoresReferenciaSMLV(nuevaBaseCalculadaSMLV);
+
+            const sueldoCustomInput = document.getElementById('sueldoMensualCustom');
+            if (sueldoCustomInput.value && parseFloat(sueldoCustomInput.value) > 0) {
+                actualizarTasasPorSueldoCustom();
+            } else {
+                inicializarTasasCalculadoraConSMLV();
+                actualizarEtiquetasDOM();
+            }
+            document.getElementById('infoSueldoCustom').textContent = `Base de horas mensuales actualizada a ${HORAS_MES_BASE.toFixed(2)} hrs. Tasas recalculadas si aplica.`;
+        }
+
+
+        function actualizarTasasPorSueldoCustom() {
+            const sueldoCustomInput = document.getElementById('sueldoMensualCustom');
+            const sueldoCustom = parseFloat(sueldoCustomInput.value);
+            const infoSueldoCustomEl = document.getElementById('infoSueldoCustom');
+
+            if (isNaN(sueldoCustom) || sueldoCustom <= 0) {
+                infoSueldoCustomEl.textContent = 'Por favor, ingresa un sueldo mensual bruto válido y positivo.';
+                resetearTasasASMLV();
+                return;
+            }
+            if (HORAS_MES_BASE === 0) {
+                infoSueldoCustomEl.textContent = 'Las horas base mensuales no pueden ser cero. Por favor, ajuste las horas semanales.';
+                return;
+            }
+
+            const nuevaHoraBaseCustom = sueldoCustom / HORAS_MES_BASE;
+            infoSueldoCustomEl.textContent = `Tasas recalculadas con base horaria de: ${formatearPesos(nuevaHoraBaseCustom, 2)} (derivado de ${formatearPesos(sueldoCustom,0)}/mes y ${HORAS_MES_BASE.toFixed(2)} hrs/mes).`;
+
+            for (const tipo in TASAS_BASE_INFO) {
+                const tasaInfoOriginal = TASAS_BASE_INFO[tipo];
+                const nuevoValorCalculado = nuevaHoraBaseCustom * tasaInfoOriginal.factorRecargo;
+                tasasCalculadoraActuales[tipo] = {
+                    nombre: tasaInfoOriginal.nombre,
+                    valorParaCalculo: nuevoValorCalculado,
+                    descTextForLabel: construirTextoDescriptivoEtiqueta(tasaInfoOriginal, nuevaHoraBaseCustom),
+                    idLabel: tasaInfoOriginal.idLabel
+                };
+            }
+            actualizarEtiquetasDOM();
+        }
+
+        function resetearTasasASMLV() {
+            inicializarTasasCalculadoraConSMLV();
+            actualizarEtiquetasDOM();
+            document.getElementById('sueldoMensualCustom').value = '';
+            const infoSueldoCustomEl = document.getElementById('infoSueldoCustom');
+            const currentBaseHourSMLV = getHoraOrdDiurnaSMLVBaseCalc();
+            infoSueldoCustomEl.textContent = `Tasas restauradas a valores SMLV (Base SMLV actual: ${formatearPesos(currentBaseHourSMLV,2)}/hr con ${HORAS_MES_BASE.toFixed(2)} hrs/mes).`;
+        }
+
+        function calcularSueldo() {
+            let totalSueldoBruto = 0; // Sueldo antes de subsidio
+            let totalHorasTrabajadas = 0;
+            let detalleCalculoStr = "";
+            let alMenosUnaHora = false;
+
+            const idsHorasInputs = {
+                ordDiurna: 'horasOrdDiurna', ordNocturna: 'horasOrdNocturna',
+                extraDiurna: 'horasExtraDiurna', extraNocturna: 'horasExtraNocturna',
+                domFestDiurna: 'horasDomFestDiurna', extraDomFest: 'horasExtraDomFest'
+            };
+
+            for (const tipo in idsHorasInputs) {
+                const horasInput = document.getElementById(idsHorasInputs[tipo]);
+                const horas = parseFloat(horasInput.value) || 0;
+                if (horas < 0) {
+                    alert(`Por favor, ingresa un valor positivo para las ${tasasCalculadoraActuales[tipo].nombre}.`);
+                    horasInput.focus(); return;
+                }
+                if (horas > 0) {
+                    alMenosUnaHora = true;
+                    const tasaParaCalculo = tasasCalculadoraActuales[tipo].valorParaCalculo;
+                    const subtotal = horas * tasaParaCalculo;
+                    totalSueldoBruto += subtotal;
+                    totalHorasTrabajadas += horas;
+                    detalleCalculoStr += `${horas.toFixed(2)} ${tasasCalculadoraActuales[tipo].nombre} × ${formatearPesos(tasaParaCalculo, 2)} = ${formatearPesos(subtotal, 2)}\n`;
+                }
+            }
+
+            const horasCustomFijo = parseFloat(document.getElementById('horasCustomValorFijo').value) || 0;
+            const valorCustomFijo = parseFloat(document.getElementById('valorCustomValorFijo').value) || 0;
+
+            if (horasCustomFijo < 0 || valorCustomFijo < 0) {
+                 alert('Las horas y valor personalizado fijo deben ser positivos.'); return;
+            }
+            if (horasCustomFijo > 0 && valorCustomFijo > 0) {
+                alMenosUnaHora = true;
+                const subtotalCustom = horasCustomFijo * valorCustomFijo;
+                totalSueldoBruto += subtotalCustom;
+                totalHorasTrabajadas += horasCustomFijo;
+                detalleCalculoStr += `${horasCustomFijo.toFixed(2)} horas (valor fijo personalizado) × ${formatearPesos(valorCustomFijo, 2)} = ${formatearPesos(subtotalCustom, 2)}\n`;
+            } else if (horasCustomFijo > 0 && valorCustomFijo <= 0) {
+                alert('Si ingresas horas con valor fijo, especifica un valor por hora mayor a cero.'); return;
+            }
+
+            if (!alMenosUnaHora) {
+                alert('Ingresa horas para al menos un tipo.'); return;
+            }
+
+            let subsidioAplicado = 0;
+            let totalSueldoConSubsidio = totalSueldoBruto;
+            const dosSMMLV = 2 * SMLV_MENSUAL;
+
+            if (totalSueldoBruto <= dosSMMLV) {
+                subsidioAplicado = SUBSIDIO_TRANSPORTE;
+                totalSueldoConSubsidio += subsidioAplicado;
+                detalleCalculoStr += `\nSubsidio de Transporte (aplica al ser <= 2 SMMLV): ${formatearPesos(SUBSIDIO_TRANSPORTE, 0)}\n`;
+            } else {
+                detalleCalculoStr += `\nSubsidio de Transporte: No aplica (sueldo bruto supera 2 SMMLV - ${formatearPesos(dosSMMLV, 0)})\n`;
+            }
+
+
+            document.getElementById('texto-resultado').innerHTML = `
+                <div class="result-summary">
+                    <div><strong>Total horas trabajadas:</strong> ${totalHorasTrabajadas.toFixed(2)}</div>
+                    <div><strong>Sueldo bruto (sin subsidio):</strong> ${formatearPesos(totalSueldoBruto, 2)}</div>
+                    ${subsidioAplicado > 0 ? `<div><strong>Subsidio de Transporte:</strong> ${formatearPesos(subsidioAplicado, 2)}</div>` : ''}
+                    <div class="result-total">Sueldo total estimado (con subsidio si aplica): ${formatearPesos(totalSueldoConSubsidio, 2)}</div>
+                </div>`;
+
+            if (detalleCalculoStr === "") detalleCalculoStr = "No se ingresaron horas.\n";
+
+            let analisisSMLV = ""
+            if (SMLV_MENSUAL > 0 && HORAS_MES_BASE > 0) {
+                const porcentajeSMLV = (totalSueldoConSubsidio / SMLV_MENSUAL * 100).toFixed(1);
+                analisisSMLV = `\n<div class="smlv-analysis"><strong>📊 Análisis comparativo con SMLV (${formatearPesos(SMLV_MENSUAL, 0)}):</strong>\n`;
+                if (totalSueldoConSubsidio >= SMLV_MENSUAL) {
+                    analisisSMLV += `<span class="positive">✅ Este sueldo (incluyendo subsidio si aplica) representa el <strong>${porcentajeSMLV}%</strong> del SMLV.</span>`;
+                } else {
+                    analisisSMLV += `<span class="negative">⚠️ Este sueldo (incluyendo subsidio si aplica) está <strong>${formatearPesos(SMLV_MENSUAL - totalSueldoConSubsidio, 0)}</strong> por debajo del SMLV. Representa el <strong>${porcentajeSMLV}%</strong> del SMLV.</span>`;
+                }
+                analisisSMLV += `</div>`;
+            }
+
+            document.getElementById('detalle-calculo').innerHTML = detalleCalculoStr.trim() + "\n" + analisisSMLV;
+            document.getElementById('resultado-sueldo').style.display = 'block';
+            document.getElementById('resultado-sueldo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function limpiarCalculadora() {
+            const idsInputs = ['horasOrdDiurna', 'horasOrdNocturna', 'horasExtraDiurna',
+                               'horasExtraNocturna', 'horasDomFestDiurna', 'horasExtraDomFest',
+                               'horasCustomValorFijo', 'valorCustomValorFijo'];
+            idsInputs.forEach(id => { document.getElementById(id).value = '0'; });
+
+            document.getElementById('horasSemanalesInput').value = 42;
+            actualizarBaseCalculoHoras(); // Recalculate base hours and associated rates
+
+            document.getElementById('sueldoMensualCustom').value = '';
+            resetearTasasASMLV();
+
+            document.getElementById('resultado-sueldo').style.display = 'none';
+            document.getElementById('infoSueldoCustom').textContent = 'Calculadora limpiada. Tasas SMLV restauradas con horas base predeterminadas.';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('horasSemanalesInput').value = horasSemanalesActuales;
+
+            const textoCalculoBaseEl = document.getElementById('textoCalculoBaseSMLV');
+            const initialBaseCalc = getHoraOrdDiurnaSMLVBaseCalc();
+            textoCalculoBaseEl.innerHTML = `Base de cálculo SMLV: Hora ordinaria diurna = ${formatearPesos(SMLV_MENSUAL, 0)} / ${HORAS_MES_BASE.toFixed(2)} horas = <strong>${formatearPesos(initialBaseCalc, 2)}</strong> (aprox.)`;
+
+            actualizarDisplayValoresReferenciaSMLV(initialBaseCalc);
+            inicializarTasasCalculadoraConSMLV();
+            actualizarEtiquetasDOM();
+        });
+    </script>
+</body>
+</html>
